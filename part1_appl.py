@@ -151,7 +151,7 @@ tabs = st.tabs(["Car find","💰 Estimate Price", "📆 Credit Calc"])
 with tabs[0]:
     df = load_data()  
     st.header("📊 Popularity & 🔎 Mileage Consistency")
-    tab_choice = st.radio(["Company Popularity","Brand Popularity", "Odometer Checker"], horizontal=True)
+    tab_choice = st.radio("Select View",["Company Popularity","Brand Popularity", "Odometer Checker"], horizontal=True)
     if tab_choice == "Company Popularity":
         st.subheader("Popular Car Brands by City")
         selected_city = st.selectbox("Select City", sorted(df["City"].unique()))
