@@ -151,25 +151,27 @@ tabs = st.tabs(["Car find","💰 Estimate Price", "📆 Credit Calc"])
 with tabs[0]:
     df = load_data()  
     st.header("📊 Popularity & 🔎 Mileage Consistency")
-    tab_choice = st.radio("Select View", ["Company Popularity","Brand Popularity", "Odometer Checker"], horizontal=True)
+    tab_choice = st.radio(["Company Popularity","Brand Popularity", "Odometer Checker"], horizontal=True)
     if tab_choice == "Company Popularity":
-        st.subheader("🔝 Popular Car Brands by City")
+        st.subheader("Popular Car Brands by City")
         selected_city = st.selectbox("Select City", sorted(df["City"].unique()))
         filtered_df = df[df["City"] == selected_city]
         top_brands = filtered_df["Company"].value_counts().head(5)
         fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(10,7))
         sns.barplot(x=top_brands.values, y=top_brands.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
         ax.set_title(f"Top 5 Brands in {selected_city.title()}")
         st.pyplot(fig)
     elif tab_choice == "Brand Popularity":
-        st.subheader("🔝 Popular Car Brands by Company and Mark")
+        st.subheader("Popular Car Brands by Company and Mark")
         selected_company = st.selectbox("Select Company", sorted(df["Company"].unique()))
         filtered_df = df[df["Company"] == selected_company]
         # Группируем сначала по компании, потом по марке
         brand_popularity = filtered_df.groupby("Mark")["Company"].count().sort_values(ascending=False).head(5)
         fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(10,7))
         sns.barplot(x=brand_popularity.values, y=brand_popularity.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
