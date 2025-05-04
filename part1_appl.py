@@ -125,7 +125,7 @@ def preprocess_odometer_model(df):
     )
 
     df = df.merge(group_median, on=["Year", "Mark", "Volume"], how="left")
-    df["OdometerNormal"] = (df["Mileage"] >= 0.65 * df["MedianMileage"]).astype(int)  # 1 - нормальный, 0 - занижен
+    df["OdometerNormal"] = (df["Mileage"] >= 0.65 * df["MedianMileage"]).astype(int)  
 
     cat_cols = ["Mark", "Fuel Type", "Transmission", "Car_type"]
     le_dict = {}
@@ -157,7 +157,7 @@ with tabs[0]:
         selected_city = st.selectbox("Select City", sorted(df["City"].unique()))
         filtered_df = df[df["City"] == selected_city]
         top_brands = filtered_df["Company"].value_counts().head(5)
-        fig, ax = plt.subplots(figsize=(6,4))
+        fig, ax = plt.subplots(figsize=(5,3))
         sns.barplot(x=top_brands.values, y=top_brands.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
@@ -168,7 +168,7 @@ with tabs[0]:
         selected_company = st.selectbox("Select Company", sorted(df["Company"].unique()))
         filtered_df = df[df["Company"] == selected_company]
         brand_popularity = filtered_df.groupby("Mark")["Company"].count().sort_values(ascending=False).head(5)
-        fig, ax = plt.subplots(figsize=(6,4))
+        fig, ax = plt.subplots(figsize=(5,3))
         sns.barplot(x=brand_popularity.values, y=brand_popularity.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
