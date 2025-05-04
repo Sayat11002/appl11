@@ -157,8 +157,7 @@ with tabs[0]:
         selected_city = st.selectbox("Select City", sorted(df["City"].unique()))
         filtered_df = df[df["City"] == selected_city]
         top_brands = filtered_df["Company"].value_counts().head(5)
-        fig, ax = plt.subplots()
-        fig, ax = plt.subplots(figsize=(8,6))
+        fig, ax = plt.subplots(figsize=(6,4))
         sns.barplot(x=top_brands.values, y=top_brands.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
@@ -168,10 +167,8 @@ with tabs[0]:
         st.subheader("Popular Car Brands by Company and Mark")
         selected_company = st.selectbox("Select Company", sorted(df["Company"].unique()))
         filtered_df = df[df["Company"] == selected_company]
-        # Группируем сначала по компании, потом по марке
         brand_popularity = filtered_df.groupby("Mark")["Company"].count().sort_values(ascending=False).head(5)
-        fig, ax = plt.subplots()
-        fig, ax = plt.subplots(figsize=(8,6))
+        fig, ax = plt.subplots(figsize=(6,4))
         sns.barplot(x=brand_popularity.values, y=brand_popularity.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
@@ -189,13 +186,11 @@ with tabs[0]:
             mark = st.selectbox("Mark", df[df["Company"] == company]["Mark"].unique())
             year = st.number_input("Year", min_value=2000, max_value=2025, value=2015)
             mileage = st.number_input("Mileage (km)", value=100000)
-
         with col2:
             volume = st.number_input("Engine Volume (L)", value=2.0)  
             fuel = st.selectbox("Fuel Type", df["Fuel Type"].unique())
             trans = st.selectbox("Transmission", df["Transmission"].unique())
             ctype = st.selectbox("Car Type", df["Car_type"].unique())
-
         if st.button("Check Odometer Integrity"):
             input_dict = {
                 "Year": year,
