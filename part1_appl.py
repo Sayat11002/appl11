@@ -158,7 +158,7 @@ with tabs[0]:
         filtered_df = df[df["City"] == selected_city]
         top_brands = filtered_df["Company"].value_counts().head(5)
         fig, ax = plt.subplots()
-        fig, ax = plt.subplots(figsize=(10,7))
+        fig, ax = plt.subplots(figsize=(8,6))
         sns.barplot(x=top_brands.values, y=top_brands.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
@@ -171,7 +171,7 @@ with tabs[0]:
         # Группируем сначала по компании, потом по марке
         brand_popularity = filtered_df.groupby("Mark")["Company"].count().sort_values(ascending=False).head(5)
         fig, ax = plt.subplots()
-        fig, ax = plt.subplots(figsize=(10,7))
+        fig, ax = plt.subplots(figsize=(8,6))
         sns.barplot(x=brand_popularity.values, y=brand_popularity.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
