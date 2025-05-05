@@ -212,16 +212,6 @@ with tabs[0]:
                 st.warning(f"⚠️ Possible MILEAGE TAMPERING detected)")
 
 # === Tab 1: Estimate Price ===
-with tabs[1]:
-    st.markdown("### 📊 Enter car details to estimate the price:")
-    company = st.selectbox("🏢 Manufacturer", sorted(raw_data['Company'].dropna().unique()), key="company_select")
-    filtered_data = raw_data[raw_data['Company'] == company]
-    mark = st.selectbox("🚘 Model", sorted(filtered_data['Mark'].dropna().unique()), key="model_select")
-    year = st.number_input("📅 Year", 1990, 2025, 2015, key="year_input")
-    fuel = st.selectbox("⛽ Fuel Type", sorted(raw_data['Fuel Type'].dropna().unique()), key="fuel_select")
-    trans = st.selectbox("⚙️ Transmission", sorted(raw_data['Transmission'].dropna().unique()), key="trans_select")
-    mileage = st.number_input("🛣️ Mileage (km)", 0, 1_000_000, 100_000, key="mileage_input")
-    car_type = st.selectbox("🚗 Body Type", sorted(raw_data['Car_type'].dropna().unique()), key="type_select")
     if st.button("📈 Estimate Price", key="price_button"):
         new_car = pd.DataFrame({
             'Company': [company],
@@ -242,9 +232,28 @@ with tabs[1]:
 
             pred = model.predict(new_car)[0]
             st.success(f"💵 Estimated Price: **{int(pred):,} ₸**")
+
+            # 🔍 Поиск похожих объявлений
+            st.markdown("### 🔍 Similar Listings:")
+            similar = raw_data[
+                (raw_data["Company"] == company) &
+                (raw_data["Mark"] == mark) &
+                (raw_data["Fuel Type"] == fuel) &
+                (raw_data["Transmission"] == trans) &
+                (raw_data["Car_type"] == car_type)
+            ].copy()
+
+            similar["Mileage_Diff"] = abs(similar["Mileage"] - mileage)
+            similar["Year_Diff"] = abs(similar["Year"] - year)
+            similar["Score"] = similar["Mileage_Diff"] + similar["Year_Diff"] * 500  # Взвешенная метрика
+
+            top3 = similar.sort_values("Score").head(3)
+            if not top3.empty:
+                st.dataframe(top3[["Company", "Mark", "Year", "Fuel Type", "Transmission", "Mileage", "Car_type", "City"]])
+            else:
+                st.info("🙁 No similar listings found.")
         except ValueError as e:
             st.error(str(e))
-
 # === Tab 2: Credit Calculator ===
 with tabs[2]:
     st.markdown("### 📆 Credit calculator coming soon...")
