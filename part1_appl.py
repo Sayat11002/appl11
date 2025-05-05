@@ -249,14 +249,14 @@ with tabs[1]:
                 (abs(raw_data["Year"] - year) <= 2) &
                 (raw_data["Fuel Type"] == fuel) &
                 (raw_data["Transmission"] == trans) &
-                (abs(raw_data["Mileage"] - mileage) <= 20000) &
+                (abs(raw_data["Mileage"] - mileage) <=40000) &
                 (raw_data["Car_type"] == car_type)
             ]
             if not filtered_similar.empty:
                 st.markdown("### 🔍 Similar Listings:")
                 st.dataframe(filtered_similar.head(3).reset_index(drop=True))
             else:
-                st.info("❗ No similar listings found in the dataset.")
+                st.info("No similar listings found.")
 
         except ValueError as e:
             st.error(str(e))
