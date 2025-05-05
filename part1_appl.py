@@ -67,14 +67,12 @@ input, textarea, select {{
 }} </style>
 """, unsafe_allow_html=True)
 
-# === Price Estimation Functions ===
-
+# === Price Estimation Functions ==
 @st.cache_data
 def load_price_data():
-    car_df = pd.read_csv(r"C:\Users\Саят\Downloads\22613data.csv")
+    car_df = pd.read_csv("22613data.csv")
     car_df = car_df.drop(['City', 'Volume'], axis=1)
     return car_df
-
 raw_data = load_price_data()
 categorical_cols = ['Company', 'Mark', 'Fuel Type', 'Transmission', 'Car_type']
 @st.cache_data
@@ -89,10 +87,8 @@ def preprocess_data(data):
     df.fillna({'Mark': 'Unknown', 'Fuel Type': 'Unknown', 'Transmission': 'Unknown'}, inplace=True)
     df['Year'] = df['Year'].fillna(df['Year'].median()).astype(int)
     df['Mileage'] = df['Mileage'].fillna(df['Mileage'].median())
-
     df = remove_outliers(df, 'Price')
     df = remove_outliers(df, 'Mileage')
-
     encoders = {}
     for col in categorical_cols:
         le = LabelEncoder()
@@ -114,17 +110,13 @@ def train_model(df):
 model = train_model(df)
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r"C:\Users\Саят\Downloads\22613data.csv")
-    df.columns = df.columns.str.strip()  # Убираем пробелы в именах столбцов
+    df = pd.read_csv("22613data.csv")
+    df.columns = df.columns.str.strip()  
     return df
-
-# Предобработка данных для проверки пробега (без City)
 @st.cache_data
 def preprocess_odometer_model(df):
     df = df.copy()
     df = df.dropna(subset=["Year", "Volume", "Mileage", "Mark"])
-
-    # Группируем по году, марке и объёму двигателя, чтобы найти медианный пробег
     group_median = (
         df.groupby(["Year", "Mark", "Volume"])["Mileage"]
         .median()
@@ -133,7 +125,7 @@ def preprocess_odometer_model(df):
     )
 
     df = df.merge(group_median, on=["Year", "Mark", "Volume"], how="left")
-    df["OdometerNormal"] = (df["Mileage"] >= 0.65 * df["MedianMileage"]).astype(int)  # 1 - нормальный, 0 - занижен
+    df["OdometerNormal"] = (df["Mileage"] >= 0.65 * df["MedianMileage"]).astype(int)  
 
     cat_cols = ["Mark", "Fuel Type", "Transmission", "Car_type"]
     le_dict = {}
@@ -147,7 +139,6 @@ def preprocess_odometer_model(df):
     y = df["OdometerNormal"]
 
     return X, y, le_dict
-# Обучение модели
 @st.cache_data
 def train_odometer_model(X, y):
     model = RandomForestClassifier(n_estimators=100, random_state=42)
@@ -158,29 +149,26 @@ st.title("🚘 Car Assistant")
 
 tabs = st.tabs(["Car find","💰 Estimate Price", "📆 Credit Calc"])
 with tabs[0]:
-    df = load_data()  # Загрузка данных с кэшированием
+    df = load_data()  
     st.header("📊 Popularity & 🔎 Mileage Consistency")
-
-    tab_choice = st.radio("Select View", ["Company Popularity","Brand Popularity", "Odometer Checker"], horizontal=True)
+    tab_choice = st.radio("Select View",["Company Popularity","Brand Popularity", "Odometer Checker"], horizontal=True)
     if tab_choice == "Company Popularity":
-        st.subheader("🔝 Popular Car Brands by City")
+        st.subheader("Popular Car Brands by City")
         selected_city = st.selectbox("Select City", sorted(df["City"].unique()))
         filtered_df = df[df["City"] == selected_city]
         top_brands = filtered_df["Company"].value_counts().head(5)
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(4,2))
         sns.barplot(x=top_brands.values, y=top_brands.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
         ax.set_title(f"Top 5 Brands in {selected_city.title()}")
         st.pyplot(fig)
-    # Вкладка "Brand Popularity"
     elif tab_choice == "Brand Popularity":
-        st.subheader("🔝 Popular Car Brands by Company and Mark")
+        st.subheader("Popular Car Brands by Company and Mark")
         selected_company = st.selectbox("Select Company", sorted(df["Company"].unique()))
         filtered_df = df[df["Company"] == selected_company]
-        # Группируем сначала по компании, потом по марке
         brand_popularity = filtered_df.groupby("Mark")["Company"].count().sort_values(ascending=False).head(5)
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(4,2))
         sns.barplot(x=brand_popularity.values, y=brand_popularity.index, ax=ax)
         ax.set_xlabel("Number of Listings")
         ax.set_ylabel("Brand")
@@ -198,17 +186,15 @@ with tabs[0]:
             mark = st.selectbox("Mark", df[df["Company"] == company]["Mark"].unique())
             year = st.number_input("Year", min_value=2000, max_value=2025, value=2015)
             mileage = st.number_input("Mileage (km)", value=100000)
-
         with col2:
-            volume = st.number_input("Engine Volume (L)", value=2.0)  # Объем двигателя в виде input
+            volume = st.number_input("Engine Volume (L)", value=2.0)  
             fuel = st.selectbox("Fuel Type", df["Fuel Type"].unique())
             trans = st.selectbox("Transmission", df["Transmission"].unique())
             ctype = st.selectbox("Car Type", df["Car_type"].unique())
-
         if st.button("Check Odometer Integrity"):
             input_dict = {
                 "Year": year,
-                "Volume": volume,  # Используем Volume для объема двигателя
+                "Volume": volume, 
                 "Mileage": mileage,
                 "Mark": le_dict["Mark"].transform([mark])[0],
                 "Fuel Type": le_dict["Fuel Type"].transform([fuel])[0],
@@ -228,7 +214,6 @@ with tabs[0]:
 # === Tab 1: Estimate Price ===
 with tabs[1]:
     st.markdown("### 📊 Enter car details to estimate the price:")
-    # Здесь идёт ваш код для оценки стоимости авто
     company = st.selectbox("🏢 Manufacturer", sorted(raw_data['Company'].dropna().unique()), key="company_select")
     filtered_data = raw_data[raw_data['Company'] == company]
     mark = st.selectbox("🚘 Model", sorted(filtered_data['Mark'].dropna().unique()), key="model_select")
@@ -237,7 +222,6 @@ with tabs[1]:
     trans = st.selectbox("⚙️ Transmission", sorted(raw_data['Transmission'].dropna().unique()), key="trans_select")
     mileage = st.number_input("🛣️ Mileage (km)", 0, 1_000_000, 100_000, key="mileage_input")
     car_type = st.selectbox("🚗 Body Type", sorted(raw_data['Car_type'].dropna().unique()), key="type_select")
-
     if st.button("📈 Estimate Price", key="price_button"):
         new_car = pd.DataFrame({
             'Company': [company],
@@ -282,4 +266,3 @@ with tabs[2]:
         st.success(f"Monthly: **{int(monthly):,} ₸**")
     else:
         st.warning("Down payment >= price")
-
