@@ -242,6 +242,22 @@ with tabs[1]:
 
             pred = model.predict(new_car)[0]
             st.success(f"💵 Estimated Price: **{int(pred):,} ₸**")
+                    # Найти похожие записи
+            filtered_similar = raw_data[
+                (raw_data["Company"] == company) &
+                (raw_data["Mark"] == mark) &
+                (abs(raw_data["Year"] - year) <= 2) &
+                (raw_data["Fuel Type"] == fuel) &
+                (raw_data["Transmission"] == trans) &
+                (abs(raw_data["Mileage"] - mileage) <= 20000) &
+                (raw_data["Car_type"] == car_type)
+            ]
+            if not filtered_similar.empty:
+                st.markdown("### 🔍 Similar Listings:")
+                st.dataframe(filtered_similar.head(3).reset_index(drop=True))
+            else:
+                st.info("❗ No similar listings found in the dataset.")
+
         except ValueError as e:
             st.error(str(e))
 
